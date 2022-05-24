@@ -394,6 +394,17 @@ r10k:
         ## NOTE: Using this secret supercedes all other credentials settings.
         existingSecret: ""
 
+  ## Optional configure serviceAccount & rbac
+  serviceAccount:
+    enabled: false
+    create: false
+
+  rbac:
+    create: false
+
+  psp:
+    create: false
+
 ## PuppetDB Configuration
 ##
 puppetdb:
