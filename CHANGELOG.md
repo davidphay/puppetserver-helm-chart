@@ -11,7 +11,7 @@ NOTE: The change log until version `v0.2.4` is auto-generated.
 - Allow r10k cron jobs to be disabled
 - Allow multi hieradata repos
 
-## [v5.18.0](https://github.com/puppetlabs/puppetserver-helm-chart/tree/v5.17.1) (2022-05-20)
+## [v5.18.0](https://github.com/puppetlabs/puppetserver-helm-chart/tree/v5.18.0) (2022-05-20)
 
 - feat: add pod security policies
 
