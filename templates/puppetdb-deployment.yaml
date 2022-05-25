@@ -80,7 +80,7 @@ spec:
             {{- toYaml .Values.puppetboard.resources | nindent 12 }}
           env:
             - name: PUPPETDB_HOST
-              value: "puppetdb"
+              value: "{{ .Values.puppetdb.overrideHostname | default "puppetdb"  }}"
             - name: PUPPETDB_PORT
               value: "8081"
             - name: PUPPETDB_SSL_VERIFY

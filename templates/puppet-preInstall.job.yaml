@@ -18,6 +18,9 @@ spec:
         {{- include "puppetserver.puppet.labels" . | nindent 8 }}
     spec:
       restartPolicy: Never
+      {{- if .Values.puppetserver.serviceAccount.enabled }}
+      serviceAccountName: {{ .Values.puppetserver.serviceAccount.accountName }}
+      {{- end }}
       containers:
         - name: copy-ro-puppetserver-certs
           image: "{{.Values.puppetserver.image}}:{{.Values.puppetserver.tag}}"
@@ -25,8 +28,17 @@ spec:
           command: [ "sh", "-c" ]
           args:
             - mkdir -p /etc/puppetlabs/puppet/ssl;
+              {{- if .Values.puppetserver.preGeneratedCertsJob.existingSecret }}
+              mkdir -p /etc/puppetlabs/puppet/ssl/certs/;
+              mkdir -p /etc/puppetlabs/puppet/ssl/private_keys/;
+              cp /puppet-certs/puppetserver/ca.pem /etc/puppetlabs/puppet/ssl/certs/ca.pem;
+              cp /puppet-certs/puppetserver/crl.pem /etc/puppetlabs/puppet/ssl/crl.pem;
+              cp /puppet-certs/puppetserver/{{ .Values.puppetserver.overrideHostname | default  (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem /etc/puppetlabs/puppet/ssl/certs/{{ .Values.puppetserver.overrideHostname | default (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem;
+              cp /puppet-certs/puppetserver/{{ .Values.puppetserver.overrideHostname | default  (include "puppetserver.puppetserver-masters.serviceName" . ) }}.key /etc/puppetlabs/puppet/ssl/private_keys/{{ .Values.puppetserver.overrideHostname | default (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem;
+              {{- else }}
               CERTS_FILE=`ls /puppet-certs/puppetserver`;
               tar xf /puppet-certs/puppetserver/"$CERTS_FILE" -C /etc/puppetlabs/puppet/ssl;
+              {{- end }}
           volumeMounts:
             - name: puppetserver-certs
               mountPath: /puppet-certs/puppetserver
@@ -38,8 +50,17 @@ spec:
           command: [ "sh", "-c" ]
           args:
             - mkdir -p /opt/puppetlabs/server/data/puppetdb/certs;
+              {{- if .Values.puppetserver.preGeneratedCertsJob.existingSecret }}
+              mkdir -p /opt/puppetlabs/server/data/puppetdb/certs/certs/;
+              mkdir -p /opt/puppetlabs/server/data/puppetdb/certs/private_keys/;
+              cp /puppet-certs/puppetdb/ca.pem /opt/puppetlabs/server/data/puppetdb/certs/certs/ca.pem;
+              cp /puppet-certs/puppetdb/crl.pem /opt/puppetlabs/server/data/puppetdb/certs/crl.pem;
+              cp /puppet-certs/puppetdb/puppetdb.pem /opt/puppetlabs/server/data/puppetdb/certs/certs/puppetdb.pem;
+              cp /puppet-certs/puppetdb/puppetdb.key /opt/puppetlabs/server/data/puppetdb/certs/private_keys/puppetdb.pem;
+              {{- else }}
               CERTS_FILE=`ls /puppet-certs/puppetdb`;
               tar xf /puppet-certs/puppetdb/"$CERTS_FILE" -C /opt/puppetlabs/server/data/puppetdb/certs --strip-components 1;
+              {{- end }}
           volumeMounts:
             - name: puppetdb-certs
               mountPath: /puppet-certs/puppetdb
@@ -55,15 +76,25 @@ spec:
         {{- end }}
         - name: puppetdb-storage
         {{- if .Values.puppetdb.customPersistentVolumeClaim.storage.enable }}
-          {{- toYaml .Values.puppetserver.puppetdb.customPersistentVolumeClaim.storage.config | nindent 10 }}
+          {{- toYaml .Values.puppetdb.customPersistentVolumeClaim.storage.config | nindent 10 }}
         {{- else }}
           persistentVolumeClaim:
             claimName: puppetdb-claim
         {{- end }}
         - name: puppetserver-certs
+        {{- if not .Values.puppetserver.preGeneratedCertsJob.existingSecret }}
           configMap:
             name: "{{ template "puppetserver.name" . }}-puppetserver-preinstall"
+        {{- else }}
+          secret:
+            secretName: {{.Values.puppetserver.preGeneratedCertsJob.existingSecret.puppetserver }}
+        {{- end }}
         - name: puppetdb-certs
+        {{- if not .Values.puppetserver.preGeneratedCertsJob.existingSecret }}
           configMap:
             name: "{{ template "puppetserver.name" . }}-puppetdb-preinstall"
+        {{- else }}
+          secret:
+            secretName: {{.Values.puppetserver.preGeneratedCertsJob.existingSecret.puppetdb }}
+        {{- end }}
 {{- end }}
