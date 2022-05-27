@@ -19,7 +19,7 @@ spec:
     spec:
       restartPolicy: Never
       {{- if .Values.puppetserver.serviceAccount.enabled }}
-      serviceAccountName: {{ .Values.puppetserver.serviceAccount.accountName }}
+      serviceAccountName: {{ include "puppetserver.puppetserver.serviceAccount.name" . }}
       {{- end }}
       containers:
         - name: copy-ro-puppetserver-certs

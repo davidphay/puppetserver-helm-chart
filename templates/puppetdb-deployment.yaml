@@ -22,7 +22,7 @@ spec:
     spec:
       hostname: puppetdb
       {{- if .Values.puppetdb.serviceAccount.enabled }}
-      serviceAccountName: {{ .Values.puppetdb.serviceAccount.accountName }}
+      serviceAccountName: {{ include "puppetserver.puppetdb.serviceAccount.name" . }}
       {{- end }}
       containers:
         {{- with .Values.puppetdb.extraContainers }}
