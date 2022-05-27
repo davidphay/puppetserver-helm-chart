@@ -349,6 +349,20 @@ Create the name for the r10k.hiera.viaHttps secret.
 {{- end -}}
 
 {{/*
+Create the name for the hiera eyaml private key Secrets.
+*/}}
+{{- define "puppetserver.hiera.privateSecret" -}}
+  eyamlpriv-secret
+{{- end -}}
+
+{{/*
+Create the name for the hiera eyaml public cert Secrets.
+*/}}
+{{- define "puppetserver.hiera.publicSecret" -}}
+  eyamlpub-secret
+{{- end -}}
+
+{{/*
 Define puppetserver service Account name
 */}}
 {{- define "puppetserver.puppetserver.serviceAccount.name" -}}
@@ -372,6 +386,8 @@ Return the appropriate apiVersion for podsecuritypolicy.
 {{- print "policy/v1beta1" -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
 Define puppetserver service Account name
 */}}
 {{- define "puppetserver.puppetserver.serviceAccount.name" -}}
