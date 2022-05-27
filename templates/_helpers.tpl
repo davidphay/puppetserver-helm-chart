@@ -360,7 +360,9 @@ Define puppetdb service Account name
 */}}
 {{- define "puppetserver.puppetdb.serviceAccount.name" -}}
 {{ default "puppetdb" .Values.serviceAccount.accountName }}
-{{- end -}} 
+{{- end -}}
+
+{{/*
 Return the appropriate apiVersion for podsecuritypolicy.
 */}}
 {{- define "podsecuritypolicy.apiVersion" -}}
@@ -376,12 +378,6 @@ Define puppetserver service Account name
 {{ default "puppetserver" .Values.serviceAccount.accountName }}
 {{- end -}} 
 
-{{/*
-Define puppetdb service Account name
-*/}}
-{{- define "puppetserver.puppetdb.serviceAccount.name" -}}
-{{ default "puppetdb" .Values.serviceAccount.accountName }}
-{{- end -}} 
 
 {{/* *************************************************************************************
 The following definitions were more complex and necessary during part of this development.
@@ -404,18 +400,4 @@ Create the name for the hiera eyaml key secret (private/public keys combined).
 {{- if .Values.hiera.eyaml.existingSecret -}}
   {{- .Values.hiera.eyaml.existingSecret -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Create the name for the hiera eyaml private key Secrets.
-*/}}
-{{- define "puppetserver.hiera.privateSecret" -}}
-  eyamlpriv-secret
-{{- end -}}
-
-{{/*
-Create the name for the hiera eyaml public cert Secrets.
-*/}}
-{{- define "puppetserver.hiera.publicSecret" -}}
-  eyamlpub-secret
 {{- end -}}
