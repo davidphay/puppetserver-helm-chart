@@ -387,14 +387,6 @@ Return the appropriate apiVersion for podsecuritypolicy.
 {{- end -}}
 {{- end -}}
 
-{{/*
-Define puppetserver service Account name
-*/}}
-{{- define "puppetserver.puppetserver.serviceAccount.name" -}}
-{{ default "puppetserver" .Values.serviceAccount.accountName }}
-{{- end -}} 
-
-
 {{/* *************************************************************************************
 The following definitions were more complex and necessary during part of this development.
 Now they are essentially just stubs but left here in case they might be needed again soon.
