@@ -361,6 +361,15 @@ Define puppetdb service Account name
 {{- define "puppetserver.puppetdb.serviceAccount.name" -}}
 {{ default "puppetdb" .Values.serviceAccount.accountName }}
 {{- end -}} 
+Return the appropriate apiVersion for podsecuritypolicy.
+*/}}
+{{- define "podsecuritypolicy.apiVersion" -}}
+{{- if semverCompare "<1.10-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- print "extensions/v1beta1" -}}
+{{- else -}}
+{{- print "policy/v1beta1" -}}
+{{- end -}}
+{{- end -}}
 
 {{/* *************************************************************************************
 The following definitions were more complex and necessary during part of this development.
