@@ -22,6 +22,7 @@ spec:
         {{- include "puppetserver.puppetserver.labels" . | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/hiera-configmap.yaml") . | sha256sum }}
+        checksum/crl-config: {{ include (print $.Template.BasePath "/update-crl-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
@@ -46,7 +47,7 @@ spec:
             - name: PUPPET_DATA_DIR
               value: "/etc/puppetlabs/code/environments"
             - name: PUPPET_SSL_CERT_PEM
-              value: "/etc/puppetlabs/puppet/ssl/certs/{{ template "puppetserver.puppetserver-masters.serviceName" . }}.pem"
+              value: "/etc/puppetlabs/puppet/ssl/certs/{{ .Values.puppetserver.overrideHostname | default  (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem"
           {{- end }}
           command: [ "sh", "-c" ]
           args:
@@ -86,6 +87,13 @@ spec:
               chown puppet:puppet /etc/puppetlabs/puppet/eyaml/keys/*private_key.pkcs7.pem;
               cp /etc/puppetlabs/puppet/configmap/eyaml/*public_key.pkcs7.pem /etc/puppetlabs/puppet/eyaml/keys/;
               chown puppet:puppet /etc/puppetlabs/puppet/eyaml/keys/*public_key.pkcs7.pem;
+              {{- end }}
+              {{- if .Values.externalCA.enabled }}
+              cp /etc/puppetlabs/puppet/configmap/crl_entrypoint.sh /etc/puppetlabs/puppet/crl_entrypoint.sh;
+              cp /etc/puppetlabs/puppet/configmap/crl_cronjob.sh /etc/puppetlabs/puppet/crl_cronjob.sh;
+              cp /etc/puppetlabs/puppet/configmap/crl.sh /etc/puppetlabs/puppet/crl.sh;
+              chown puppet:puppet /etc/puppetlabs/puppet/crl_entrypoint.sh /etc/puppetlabs/puppet/crl_cronjob.sh /etc/puppetlabs/puppet/crl.sh;
+              chmod +x /etc/puppetlabs/puppet/crl_entrypoint.sh /etc/puppetlabs/puppet/crl_cronjob.sh /etc/puppetlabs/puppet/crl.sh;
               {{- end }}
           securityContext:
             runAsUser: 0
@@ -143,6 +151,17 @@ spec:
               mountPath: /etc/puppetlabs/puppet/configmap/eyaml/private_key.pkcs7.pem
               subPath: private_key.pkcs7.pem
             {{- end }}
+            {{- if .Values.externalCA.enabled }}
+            - name: crl-volume
+              mountPath: /etc/puppetlabs/puppet/configmap/crl_entrypoint.sh
+              subPath: crl_entrypoint.sh
+            - name: crl-volume
+              mountPath: /etc/puppetlabs/puppet/configmap/crl_cronjob.sh
+              subPath: crl_cronjob.sh
+            - name: crl-volume
+              mountPath: /etc/puppetlabs/puppet/configmap/crl.sh
+              subPath: crl.sh
+            {{- end }}
       containers:
         - name: {{ template "puppetserver.fullname" . }}
           image: "{{.Values.puppetserver.image}}:{{.Values.puppetserver.tag}}"
@@ -156,8 +175,16 @@ spec:
             {{- end }}
             # necessary to set certname and server in puppet.conf, required by
             # puppetserver ca cli application
+            {{- if .Values.externalCA.enabled }}
+            - name: CA_ENABLED
+              value: "false"
+            {{- end }}
             - name: PUPPETSERVER_HOSTNAME
+              {{- if .Values.puppetserver.overrideHostname }}
+              value: {{ .Values.puppetserver.overrideHostname | quote }}
+              {{- else }}
               value: "{{ template "puppetserver.puppetserver-masters.serviceName" . }}"
+              {{- end }}              
             - name: PUPPET_MASTERPORT
               value: "{{ template "puppetserver.puppetserver-masters.port" . }}"
             - name: DNS_ALT_NAMES
@@ -281,6 +308,27 @@ spec:
             successThreshold: 1
             timeoutSeconds: 5
         {{- end }}
+        {{- if .Values.externalCA.enabled }}
+        # externalCA crl script update Sidecar
+        - name: update-crl
+          image: "{{.Values.r10k.image}}:{{.Values.r10k.tag}}"
+          imagePullPolicy: "{{.Values.r10k.pullPolicy}}"
+          command: ["sh", "-c", "/etc/puppetlabs/puppet/crl_entrypoint.sh" ]
+          securityContext:
+            runAsUser: 999   # "puppet" UID
+            runAsGroup: 999 # "puppet" GID
+          volumeMounts:
+          - name: puppet-puppet-storage
+            mountPath: /etc/puppetlabs/puppet/
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-ec", "test -f ~/.crl_cronjob.success"]
+            failureThreshold: 2
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+        {{- end }}
       securityContext:
         fsGroup: 999   # "puppet" GID
       volumes:
@@ -304,6 +352,11 @@ spec:
         {{- else }}
           persistentVolumeClaim:
             claimName: puppet-puppet-claim
+        {{- end }}
+        {{- if .Values.externalCA.enabled }}
+        - name: crl-volume
+          configMap:
+            name: crl-config
         {{- end }}
         - name: puppet-serverdata-storage
         {{- if .Values.puppetserver.masters.customPersistentVolumeClaim.serverdata.enable }}

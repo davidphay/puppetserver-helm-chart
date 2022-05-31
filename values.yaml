@@ -678,3 +678,9 @@ storage:
   ##
   annotations: {}
   size: 400Mi
+
+
+externalCA:
+  enabled: false
+  cronJob: 
+    schedule: "* 0 * * * *"

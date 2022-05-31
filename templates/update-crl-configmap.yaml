@@ -1,0 +1,35 @@
+{{- if .Values.externalCA.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crl-config
+data:
+  crl.sh: |-
+    {{ required "the script to retrieve crl.pem" .Values.externalCA.config | nindent 4 }}
+
+  crl_cronjob.sh: |
+    #!/usr/bin/env sh
+    /etc/puppetlabs/puppet/crl.sh > ~/.crl_cronjob.out 2>&1
+    retVal=$?
+    if [ "$retVal" -eq "0" ]; then
+      touch ~/.crl_cronjob.success > /dev/null 2>&1
+    else
+      rm ~/.crl_cronjob.success > /dev/null 2>&1
+    fi
+    exit $retVal
+
+  crl_entrypoint.sh: |
+    #!/usr/bin/env sh
+    set -e
+
+    if [ ! -f /etc/puppetlabs/puppet/ssl/crl.pem ]; then
+      /bin/sh -c /etc/puppetlabs/puppet/crl_cronjob.sh
+    fi
+
+    cat > ~/.crl_crontab <<'EOF'
+    {{ .Values.externalCA.cronJob.schedule }} /bin/sh -c /etc/puppetlabs/puppet/crl_cronjob.sh
+    EOF
+    # tail -Fq ~/.crl_cronjob.out &
+    touch ~/.crl_cronjob.success > /dev/null 2>&1
+    exec supercronic ~/.crl_crontab
+{{- end }}

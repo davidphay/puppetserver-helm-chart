@@ -32,7 +32,6 @@ spec:
               mkdir -p /etc/puppetlabs/puppet/ssl/certs/;
               mkdir -p /etc/puppetlabs/puppet/ssl/private_keys/;
               cp /puppet-certs/puppetserver/ca.pem /etc/puppetlabs/puppet/ssl/certs/ca.pem;
-              cp /puppet-certs/puppetserver/crl.pem /etc/puppetlabs/puppet/ssl/crl.pem;
               cp /puppet-certs/puppetserver/{{ .Values.puppetserver.overrideHostname | default  (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem /etc/puppetlabs/puppet/ssl/certs/{{ .Values.puppetserver.overrideHostname | default (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem;
               cp /puppet-certs/puppetserver/{{ .Values.puppetserver.overrideHostname | default  (include "puppetserver.puppetserver-masters.serviceName" . ) }}.key /etc/puppetlabs/puppet/ssl/private_keys/{{ .Values.puppetserver.overrideHostname | default (include "puppetserver.puppetserver-masters.serviceName" . ) }}.pem;
               {{- else }}
@@ -54,7 +53,6 @@ spec:
               mkdir -p /opt/puppetlabs/server/data/puppetdb/certs/certs/;
               mkdir -p /opt/puppetlabs/server/data/puppetdb/certs/private_keys/;
               cp /puppet-certs/puppetdb/ca.pem /opt/puppetlabs/server/data/puppetdb/certs/certs/ca.pem;
-              cp /puppet-certs/puppetdb/crl.pem /opt/puppetlabs/server/data/puppetdb/certs/crl.pem;
               cp /puppet-certs/puppetdb/puppetdb.pem /opt/puppetlabs/server/data/puppetdb/certs/certs/puppetdb.pem;
               cp /puppet-certs/puppetdb/puppetdb.key /opt/puppetlabs/server/data/puppetdb/certs/private_keys/puppetdb.pem;
               {{- else }}
