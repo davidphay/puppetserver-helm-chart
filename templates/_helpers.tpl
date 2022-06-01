@@ -49,15 +49,21 @@ Create the args array for "r10k_hiera_cronjob.sh"
 {{/*
 Create unified labels for Puppetserver components
 */}}
-{{- define "puppetserver.common.matchLabels" -}}
-app: {{ template "puppetserver.name" . }}
-release: {{ .Release.Name }}
+{{- define "puppetserver.common.metaLabels" -}}
+app.kubernetes.io/name: "puppet"
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ template "puppetserver.chart" . }}
 {{- end -}}
 
-{{- define "puppetserver.common.metaLabels" -}}
-chart: {{ template "puppetserver.chart" . }}
-heritage: {{ .Release.Service }}
+{{- define "puppetserver.common.matchLabels" -}}
+app: {{ template "puppetserver.name" . }}
 {{- end -}}
+
+{{- define "r10k.common.matchLabels" -}}
+app: r10k
+{{- end -}}
+
 
 {{- define "puppetserver.puppet.labels" -}}
 {{ include "puppetserver.common.matchLabels" . }}
@@ -71,7 +77,7 @@ heritage: {{ .Release.Service }}
 
 {{- define "puppetserver.hiera.matchLabels" -}}
 component: {{ .Values.hiera.name | quote }}
-{{ include "puppetserver.common.matchLabels" . }}
+{{ include "r10k.common.matchLabels" . }}
 {{- end -}}
 
 {{- define "puppetserver.r10k.labels" -}}
