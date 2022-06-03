@@ -53,17 +53,13 @@ Create unified labels for Puppetserver components
 app.kubernetes.io/name: "puppet"
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+heritage: {{ .Release.Service }}
 helm.sh/chart: {{ template "puppetserver.chart" . }}
 {{- end -}}
 
 {{- define "puppetserver.common.matchLabels" -}}
 app: {{ template "puppetserver.name" . }}
 {{- end -}}
-
-{{- define "r10k.common.matchLabels" -}}
-app: r10k
-{{- end -}}
-
 
 {{- define "puppetserver.puppet.labels" -}}
 {{ include "puppetserver.common.matchLabels" . }}
@@ -77,7 +73,6 @@ app: r10k
 
 {{- define "puppetserver.hiera.matchLabels" -}}
 component: {{ .Values.hiera.name | quote }}
-{{ include "r10k.common.matchLabels" . }}
 {{- end -}}
 
 {{- define "puppetserver.r10k.labels" -}}
