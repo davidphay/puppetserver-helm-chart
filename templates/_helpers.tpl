@@ -53,7 +53,6 @@ Create unified labels for Puppetserver components
 app.kubernetes.io/name: "puppet"
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-heritage: {{ .Release.Service }}
 helm.sh/chart: {{ template "puppetserver.chart" . }}
 {{- end -}}
 
