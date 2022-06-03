@@ -53,6 +53,7 @@ Create unified labels for Puppetserver components
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ template "puppetserver.chart" . }}
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
 {{- end -}}
 
 {{- define "puppetserver.common.matchLabels" -}}
@@ -70,7 +71,7 @@ app.kubernetes.io/name: {{ template "puppetserver.name" . }}
 {{- end -}}
 
 {{- define "puppetserver.hiera.matchLabels" -}}
-component: {{ .Values.hiera.name | quote }}
+app.kubernetes.io/component: {{ .Values.hiera.name }}
 {{- end -}}
 
 {{- define "puppetserver.r10k.labels" -}}
@@ -79,7 +80,7 @@ component: {{ .Values.hiera.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.r10k.matchLabels" -}}
-component: {{ .Values.r10k.name | quote }}
+app.kubernetes.io/component: {{ .Values.r10k.name }}
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -89,7 +90,7 @@ component: {{ .Values.r10k.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.postgresql.matchLabels" -}}
-component: {{ .Values.postgresql.name | quote }}
+app.kubernetes.io/component: {{ .Values.postgresql.name }}
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -99,7 +100,7 @@ component: {{ .Values.postgresql.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.puppetdb.matchLabels" -}}
-component: {{ .Values.puppetdb.name | quote }}
+app.kubernetes.io/component: {{ .Values.puppetdb.name }}
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -109,7 +110,7 @@ component: {{ .Values.puppetdb.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.puppetboard.matchLabels" -}}
-component: {{ .Values.puppetboard.name | quote }}
+app.kubernetes.io/component: {{ .Values.puppetboard.name }}
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -119,7 +120,7 @@ component: {{ .Values.puppetboard.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.puppetserver.matchLabels" -}}
-component: {{ .Values.puppetserver.name | quote }}
+app.kubernetes.io/component: {{ .Values.puppetserver.name }}
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -129,7 +130,7 @@ component: {{ .Values.puppetserver.name | quote }}
 {{- end -}}
 
 {{- define "puppetserver.puppetserver-compilers.matchLabels" -}}
-component: "{{ .Values.puppetserver.name }}-compilers"
+app.kubernetes.io/component: {{ .Values.puppetserver.name }}-compilers
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
@@ -139,7 +140,7 @@ component: "{{ .Values.puppetserver.name }}-compilers"
 {{- end -}}
 
 {{- define "puppetserver.puppetserver-data.matchLabels" -}}
-component: "{{ .Values.puppetserver.name }}-serverdata"
+app.kubernetes.io/component: {{ .Values.puppetserver.name }}-serverdata
 {{ include "puppetserver.common.matchLabels" . }}
 {{- end -}}
 
