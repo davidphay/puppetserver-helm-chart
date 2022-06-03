@@ -50,14 +50,13 @@ Create the args array for "r10k_hiera_cronjob.sh"
 Create unified labels for Puppetserver components
 */}}
 {{- define "puppetserver.common.metaLabels" -}}
-app.kubernetes.io/name: "puppet"
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ template "puppetserver.chart" . }}
 {{- end -}}
 
 {{- define "puppetserver.common.matchLabels" -}}
-app: {{ template "puppetserver.name" . }}
+app.kubernetes.io/name: {{ template "puppetserver.name" . }}
 {{- end -}}
 
 {{- define "puppetserver.puppet.labels" -}}
